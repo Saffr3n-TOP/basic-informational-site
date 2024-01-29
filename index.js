@@ -3,13 +3,12 @@ import { fileURLToPath } from "url";
 import { createServer } from "http";
 import * as fs from "fs/promises";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const hostname = "localhost";
 const port = 8080;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const validPageNames = ["index.html", "about.html", "contact-me.html"];
 
 createServer(async (req, res) => {
-  const url = new URL(req.url, `http://${hostname}:${port}`);
+  const url = new URL(req.url, "http://" + req.headers.host);
   const pageName = url.pathname.slice(1);
   const page = await getPage(pageName);
   const statusCode = !page ? 500 : isValidPageName(pageName) ? 200 : 404;
@@ -21,8 +20,8 @@ createServer(async (req, res) => {
   }
 
   res.end(page);
-}).listen(port, hostname, () => {
-  console.log("Server is running at http://" + hostname + ":" + port);
+}).listen(port, () => {
+  console.log("Server is running on port", port);
 });
 
 async function getPage(name) {
